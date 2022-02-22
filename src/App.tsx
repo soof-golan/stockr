@@ -7,11 +7,13 @@ type AlpacaCredentials = { secret: string, keyId: string };
 class SocketController {
   private ws: Partial<WebSocket> = {};
   private credentials?: AlpacaCredentials;
-  private promisifyClose = async (ws: Partial<WebSocket>) => new Promise<void>(resolve => ws.onclose = (e) => resolve());
+  private promisifyClose = async (ws: Partial<WebSocket>) => new Promise<void>(resolve => ws.onclose = () => resolve());
   private static instance: SocketController = new SocketController();
   static get = () => SocketController.instance;
 
-  private constructor() {  };
+  private constructor() {
+  };
+
   send = (obj: {}) => this.ws?.send?.(JSON.stringify(obj));
 
   handleError = (message: AlpacaMessage) => {
@@ -26,14 +28,14 @@ class SocketController {
     this.send({action: "auth", key: keyId, secret});
   }
 
-  private tradeHandlers: {[T: string]: Array<(m: AlpacaMessage) => null>} = {
+  private tradeHandlers: { [T: string]: Array<(m: AlpacaMessage) => null> } = {
     q: [],
     t: []
   }
 
   private handlers: { [eventName: string]: (message: AlpacaMessage) => any } = {
-    'authenticated': (message: AlpacaMessage) => console.log('Connected successfully!'),
-    'connected': ({T}: AlpacaMessage) => (T === 'success') ? this.authenticate(this) : null,
+    'authenticated': (message: AlpacaMessage) => console.log('Connected successfully!', message),
+    'connected': ({T}: AlpacaMessage) => (T === 'success') ? this.authenticate() : null,
     "connection limit exceeded": this.handleError,
     "auth timeout": this.handleError,
     "auth failed": this.handleError,
@@ -73,12 +75,9 @@ const useSocketController = () => SocketController.get()
 function App() {
   const storage = window.localStorage;
   const socketController = useSocketController();
-  const [secret, setSecret] = useState(storage?.secret ?? '')
-  const [keyId, setKeyId] = useState(storage?.keyId ?? '')
-  const [ticker, setTicker] = useState('')
-  // useEffect(() => {
-  //   socketController.connect({keyId, secret})
-  // })
+  const [secret, setSecret] = useState(storage?.secret ?? '');
+  const [keyId, setKeyId] = useState(storage?.keyId ?? '');
+  const [ticker, setTicker] = useState('');
   const updateSecret = (value: string) => {
     storage.setItem('secret', value);
     setSecret(value);
