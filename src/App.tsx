@@ -1,41 +1,75 @@
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import logo from './logo.svg'
 import './App.css'
 
+const alpacaSocket = (keyId: string, secret: string) => {
+  type AlpacaMessage = { T: string, msg: string };
+
+  const ws = new WebSocket('wss://stream.data.alpaca.markets/v2/iex');
+  const send = (o: any) => ws.send(JSON.stringify(o));
+
+  const authenticate = () => {
+    console.log('Authenticating', keyId)
+    send({action: "auth", key: keyId, secret});
+  }
+  const handleError = (message: AlpacaMessage) => {
+    console.error(message)
+    ws.close()
+  }
+  const handlers: { [eventName: string]: (message: AlpacaMessage) => any } = {
+    'authenticated': (message: AlpacaMessage) => console.log('Connected successfully!'),
+    'connected': ({T}: AlpacaMessage) => (T === 'success') ? authenticate() : null,
+    "connection limit exceeded": handleError,
+    "auth timeout": handleError,
+    "auth failed": handleError,
+  }
+  ws.onmessage = (event: MessageEvent) => {
+    const messages: AlpacaMessage[] = JSON.parse(event.data);
+    console.log('Message:', messages)
+    messages.map((message) => {
+      console.log(message.msg)
+      return handlers[message.msg.toString()](message);
+    })
+  }
+  ws.onclose = (e) => console.log('Closing:', e)
+  return ws;
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const storage = window.localStorage;
+  const [secret, setSecret] = useState(storage.getItem('secret') ?? '')
+  const [keyId, setKeyId] = useState("")
+  const [ws, setWs]: [WebSocket | null, any] = useState(null);
+
+  useEffect(() => {
+    const newSocket = alpacaSocket(keyId, secret);
+    setWs(newSocket);
+    return () => newSocket.close();
+  }, [setWs, setSecret, setKeyId]);
+
+  useEffect(() => {
+    storage.setItem('secret', secret)
+  }, [setSecret])
+
+  useEffect(() => {
+    storage.setItem('keyId', keyId)
+  }, [setKeyId])
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <img src={logo} className="App-logo" alt="logo"/>
         <p>Hello Vite + React!</p>
         <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
+          Secret: <input type="password" onChange={(event) => setSecret(event.target.value)}/>
+        </p>
+        <p>
+          Key ID: <input type="text" onChange={(event) => setKeyId(event.target.value)}/>
+        </p>
+        <p>
+          <button type='button' onClick={() => setWs(alpacaSocket(keyId, secret))}>
+            Connect!
           </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
         </p>
       </header>
     </div>
