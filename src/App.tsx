@@ -37,8 +37,8 @@ const alpacaSocket = (keyId: string, secret: string) => {
 
 function App() {
   const storage = window.localStorage;
-  const [secret, setSecret] = useState(storage.getItem('secret') ?? '')
-  const [keyId, setKeyId] = useState("")
+  const [secret, setSecret] = useState(storage?.secret ?? '')
+  const [keyId, setKeyId] = useState(storage?.keyId ?? '')
   const [ws, setWs]: [WebSocket | null, any] = useState(null);
 
   useEffect(() => {
@@ -47,24 +47,24 @@ function App() {
     return () => newSocket.close();
   }, [setWs, setSecret, setKeyId]);
 
-  useEffect(() => {
-    storage.setItem('secret', secret)
-  }, [setSecret])
-
-  useEffect(() => {
-    storage.setItem('keyId', keyId)
-  }, [setKeyId])
-
+  const updateSecret = (value: string) => {
+    storage.setItem('secret', value);
+    setSecret(value);
+  }
+  const updateKeyId = (value: string) => {
+    storage.setItem('keyId', value);
+    setKeyId(value);
+  }
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo"/>
         <p>Hello Vite + React!</p>
         <p>
-          Secret: <input type="password" onChange={(event) => setSecret(event.target.value)}/>
+          Secret: <input type="password" onChange={(event) => updateSecret(event.target.value)} value={secret}/>
         </p>
         <p>
-          Key ID: <input type="text" onChange={(event) => setKeyId(event.target.value)}/>
+          Key ID: <input type="text" onChange={(event) => updateKeyId(event.target.value)} value={keyId}/>
         </p>
         <p>
           <button type='button' onClick={() => setWs(alpacaSocket(keyId, secret))}>
