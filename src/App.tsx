@@ -2,7 +2,9 @@ import {useState} from 'react'
 import './App.css'
 
 type AlpacaMessage = { T: string, msg: string, code?: number };
+type TradeMessage = AlpacaMessage;
 type AlpacaCredentials = { secret: string, keyId: string };
+type TradeHandler = (msg: TradeMessage) => null;
 
 class SocketController {
   private ws: Partial<WebSocket> = {};
@@ -28,7 +30,7 @@ class SocketController {
     this.send({action: "auth", key: keyId, secret});
   }
 
-  private tradeHandlers: { [T: string]: Array<(m: AlpacaMessage) => null> } = {
+  private tradeHandlers: { [T: string]: Array<(m: AlpacaMessage) => any> } = {
     q: [],
     t: []
   }
@@ -59,15 +61,18 @@ class SocketController {
     this.ws.onopen = null;
   }
 
-  connect = (credentials: AlpacaCredentials) => {
+  public connect = (credentials: AlpacaCredentials) => {
     this.close();
     this.credentials = credentials
     this.ws = new WebSocket('wss://stream.data.alpaca.markets/v2/iex');
     this.ws.onmessage = this.onMessage.bind(this);
   }
 
-  subscribe = (ticker: string) => this.send({action: "subscribe", trades: [ticker], quotes: [ticker]});
-  unsubscribe = (ticker: string) => this.send({action: "unsubscribe", trades: [ticker], quotes: [ticker]});
+  public subscribe = (ticker: string) => this.send({action: "subscribe", trades: [ticker], quotes: [ticker]});
+  public unsubscribe = (ticker: string) => this.send({action: "unsubscribe", trades: [ticker], quotes: [ticker]});
+  private addHandler = (handler: TradeHandler, T: string): any => this.tradeHandlers[T].push(handler);
+  public addTradeHandler = (handler: TradeHandler) => this.addHandler(handler, 't')
+  public addQuoteHandler = (handler: TradeHandler) => this.addHandler(handler, 'q');
 }
 
 const useSocketController = () => SocketController.get()
