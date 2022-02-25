@@ -1,7 +1,9 @@
 import {useState} from 'react'
 import './App.css'
+import {Box, Button, ButtonGroup, Grid, TextField} from "@mui/material";
+import {DataGrid} from "@mui/x-data-grid";
 
-type AlpacaMessage = { T: string, msg: string, code?: number};
+type AlpacaMessage = { T: string, msg: string, code?: number };
 type TradeMessage = { T: 'q' | 't', ap: number, bp: number } | AlpacaMessage;
 type AlpacaCredentials = { secret: string, keyId: string };
 type TradeHandler = (msg: TradeMessage) => void;
@@ -73,6 +75,7 @@ class SocketController {
   private addHandler = (handler: TradeHandler, T: string): any => this.tradeHandlers[T].push(handler);
   public addTradeHandler = (handler: TradeHandler) => this.addHandler(handler, 't')
   public addQuoteHandler = (handler: TradeHandler) => this.addHandler(handler, 'q');
+  public status = () => !this.ws.CLOSED
 }
 
 const useSocketController = () => SocketController.get()
@@ -84,6 +87,7 @@ function App() {
   const [keyId, setKeyId] = useState(storage?.keyId ?? '');
   const [ticker, setTicker] = useState('');
   const [ap, setAp] = useState(-1)
+  const [rows, setRows] = useState([])
   socketController.addQuoteHandler((m) => {
     console.log(m);
     setAp(m.ap);
@@ -99,23 +103,81 @@ function App() {
   const updateTicker = (value: string) => {
     setTicker((value ?? '').toString().toUpperCase())
   }
+  const gridXs = 2
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>stockr</h1>
-        <p>
-          Secret: <input type="password" onChange={(event) => updateSecret(event.target.value)} value={secret}/>
-        </p>
-        <p>
-          Key ID: <input type="text" onChange={(event) => updateKeyId(event.target.value)} value={keyId}/>
-        </p>
-        <button type='button' onClick={() => socketController.connect({keyId, secret})}> Connect!</button>
-        <p>
-          Subscribe: <input type="text" onChange={(event) => updateTicker(event.target.value)} value={ticker}/>
-          <button type='button' onClick={() => socketController.subscribe(ticker)}> Subscribe!</button>
-          <button type='button' onClick={() => socketController.unsubscribe(ticker)}> Unsubscribe!</button>
-        </p>
+        <Box>
+          <Grid container spacing={2} columns={6}>
+            <Grid container item>
+              <Grid item>
+                <TextField
+                  id="alpaca-api-key-secret"
+                  label="API Key Secret"
+                  type="password"
+                  defaultValue={secret}
+                  autoComplete='alpaca-api-key-secret'
+                  onChange={(event) => updateSecret(event.target.value)}
+                  value={secret}
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  id="alpaca-api-key-id"
+                  label="API Key ID"
+                  type='text'
+                  defaultValue={keyId}
+                  autoComplete='alpaca-api-key-id'
+                  onChange={(event) => updateKeyId(event.target.value)}
+                  value={keyId}
+                />
+              </Grid>
+              <Grid item>
+                <Button
+                  className='button-stockr'
+                  variant="contained"
+                  onClick={() => socketController.connect({keyId, secret})}>
+                  {socketController?.status() ? 'Connected ⚡' : 'Press to Connect 🚀'}
+                </Button>
+              </Grid>
+            </Grid>
+            <Grid container item>
+              <Grid item>
+                <TextField
+                  id="ticker"
+                  label="Ticker"
+                  type='text'
+                  defaultValue=''
+                  onChange={(event) => updateTicker(event.target.value)}
+                  value={ticker}
+                />
+              </Grid>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  className='button-stockr'
+                  onClick={() => socketController.subscribe(ticker)}>
+                  Subscribe
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  className='button-stockr'
+                  onClick={() => socketController.unsubscribe(ticker)}>
+                  Unsubscribe
+                </Button>
+              </Grid>
+            </Grid>
+
+          </Grid>
+        </Box>
+
+
+        {/*<DataGrid columns={['123',]} rows={[]}>*/}
+        {/*</DataGrid>*/}
         <div>
           <ul>
             <li>
