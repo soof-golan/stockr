@@ -635,7 +635,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/utils@npm:^5.4.2":
+"@mui/utils@npm:^5.4.1, @mui/utils@npm:^5.4.2":
   version: 5.4.2
   resolution: "@mui/utils@npm:5.4.2"
   dependencies:
@@ -647,6 +647,22 @@ __metadata:
   peerDependencies:
     react: ^17.0.0
   checksum: 8d69572a2989bf11b897fb62b8c671968356b549dac285e99eab9cf8a9bce78a758926551fde8979f469b21a9647fc0dc42b49f0c0d30fe89d768c4eadf1e9a8
+  languageName: node
+  linkType: hard
+
+"@mui/x-data-grid@npm:^5.5.1":
+  version: 5.5.1
+  resolution: "@mui/x-data-grid@npm:5.5.1"
+  dependencies:
+    "@mui/utils": ^5.4.1
+    clsx: ^1.1.1
+    prop-types: ^15.8.1
+    reselect: ^4.1.5
+  peerDependencies:
+    "@mui/material": ^5.2.8
+    "@mui/system": ^5.2.8
+    react: ^17.0.2
+  checksum: 1474857020cf7a3d3fad257c309c2121b2f7b0e8d6877cd3fb843d82cbef1ebcdb397bcd8b8eeb54be41b7d837ad1b091ce4e06c4f7b5283f4b9c8c47d2bcccb
   languageName: node
   linkType: hard
 
@@ -1973,7 +1989,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
+"prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -2058,6 +2074,13 @@ __metadata:
   version: 0.13.9
   resolution: "regenerator-runtime@npm:0.13.9"
   checksum: 65ed455fe5afd799e2897baf691ca21c2772e1a969d19bb0c4695757c2d96249eb74ee3553ea34a91062b2a676beedf630b4c1551cc6299afb937be1426ec55e
+  languageName: node
+  linkType: hard
+
+"reselect@npm:^4.1.5":
+  version: 4.1.5
+  resolution: "reselect@npm:4.1.5"
+  checksum: 54c13c1e795b2ea70cba8384138aebe78adda00cbea303cc94b64da0a70d74c896cc9a03115ae38b8bff990e7a60dcd6452ab68cbec01b0b38c1afda70714cf0
   languageName: node
   linkType: hard
 
@@ -2249,6 +2272,7 @@ __metadata:
     "@emotion/react": ^11.8.1
     "@emotion/styled": ^11.8.1
     "@mui/material": ^5.4.3
+    "@mui/x-data-grid": ^5.5.1
     "@types/react": ^17.0.33
     "@types/react-dom": ^17.0.10
     "@vitejs/plugin-react": ^1.0.7
