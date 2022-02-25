@@ -1,10 +1,10 @@
 import {useState} from 'react'
 import './App.css'
 
-type AlpacaMessage = { T: string, msg: string, code?: number };
-type TradeMessage = AlpacaMessage;
+type AlpacaMessage = { T: string, msg: string, code?: number};
+type TradeMessage = { T: 'q' | 't', ap: number, bp: number } | AlpacaMessage;
 type AlpacaCredentials = { secret: string, keyId: string };
-type TradeHandler = (msg: TradeMessage) => null;
+type TradeHandler = (msg: TradeMessage) => void;
 
 class SocketController {
   private ws: Partial<WebSocket> = {};
@@ -30,7 +30,7 @@ class SocketController {
     this.send({action: "auth", key: keyId, secret});
   }
 
-  private tradeHandlers: { [T: string]: Array<(m: AlpacaMessage) => any> } = {
+  private tradeHandlers: { [T: string]: Array<(m: TradeMessage) => any> } = {
     q: [],
     t: []
   }
@@ -83,6 +83,11 @@ function App() {
   const [secret, setSecret] = useState(storage?.secret ?? '');
   const [keyId, setKeyId] = useState(storage?.keyId ?? '');
   const [ticker, setTicker] = useState('');
+  const [ap, setAp] = useState(-1)
+  socketController.addQuoteHandler((m) => {
+    console.log(m);
+    setAp(m.ap);
+  })
   const updateSecret = (value: string) => {
     storage.setItem('secret', value);
     setSecret(value);
@@ -111,6 +116,13 @@ function App() {
           <button type='button' onClick={() => socketController.subscribe(ticker)}> Subscribe!</button>
           <button type='button' onClick={() => socketController.unsubscribe(ticker)}> Unsubscribe!</button>
         </p>
+        <div>
+          <ul>
+            <li>
+              Asking Price {ap}
+            </li>
+          </ul>
+        </div>
       </header>
     </div>
   )
