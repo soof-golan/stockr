@@ -1,17 +1,30 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import './App.css'
-import {Box, Button, ButtonGroup, Grid, TextField} from "@mui/material";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
 import {DataGrid} from "@mui/x-data-grid";
 
 type AlpacaMessage = { T: string, msg: string, code?: number };
 type TradeMessage = { T: 'q' | 't', ap: number, bp: number } | AlpacaMessage;
 type AlpacaCredentials = { secret: string, keyId: string };
 type TradeHandler = (msg: TradeMessage) => void;
+type ConnectionHandler = (value: boolean) => void;
 
 class SocketController {
   private ws: Partial<WebSocket> = {};
   private credentials?: AlpacaCredentials;
-  private promisifyClose = async (ws: Partial<WebSocket>) => new Promise<void>(resolve => ws.onclose = () => resolve());
+  private promisifyClose = async (ws: Partial<WebSocket>) => new Promise<void>(resolve => {
+    const prevHandler = ws.onclose;
+    return ws.onclose = (e) => {
+      console.log(prevHandler)
+      if (typeof prevHandler === 'function'){
+        prevHandler(e);
+      }
+      resolve();
+    };
+  });
   private static instance: SocketController = new SocketController();
   static get = () => SocketController.instance;
 
@@ -31,7 +44,7 @@ class SocketController {
     console.log('Authenticating', keyId)
     this.send({action: "auth", key: keyId, secret});
   }
-
+  private connectionHandlers: Array<(v: boolean) => any> = []
   private tradeHandlers: { [T: string]: Array<(m: TradeMessage) => any> } = {
     q: [],
     t: []
@@ -68,6 +81,10 @@ class SocketController {
     this.credentials = credentials
     this.ws = new WebSocket('wss://stream.data.alpaca.markets/v2/iex');
     this.ws.onmessage = this.onMessage.bind(this);
+    this.ws.onclose = (e) => {
+      console.warn(e)
+      this.connectionHandlers.map(f => f(false))
+    };
   }
 
   public subscribe = (ticker: string) => this.send({action: "subscribe", trades: [ticker], quotes: [ticker]});
@@ -75,7 +92,8 @@ class SocketController {
   private addHandler = (handler: TradeHandler, T: string): any => this.tradeHandlers[T].push(handler);
   public addTradeHandler = (handler: TradeHandler) => this.addHandler(handler, 't')
   public addQuoteHandler = (handler: TradeHandler) => this.addHandler(handler, 'q');
-  public status = () => !this.ws.CLOSED
+  public addConnectionHandler = (handler: (value: boolean) => any) => this.connectionHandlers.push(handler);
+  public connected = () => !this.ws.CLOSED && this.ws.OPEN
 }
 
 const useSocketController = () => SocketController.get()
@@ -86,12 +104,20 @@ function App() {
   const [secret, setSecret] = useState(storage?.secret ?? '');
   const [keyId, setKeyId] = useState(storage?.keyId ?? '');
   const [ticker, setTicker] = useState('');
-  const [ap, setAp] = useState(-1)
+  const [connected, setConnectedStatus] = useState(socketController.connected());
+  const [ap, setAp] = useState(-1);
+  const [q, setQ] = useState('');
   const [rows, setRows] = useState([])
   socketController.addQuoteHandler((m) => {
     console.log(m);
-    setAp(m.ap);
+    setQ(JSON.stringify(m));
+    if (m.ap !== 0) {
+      setAp(m.ap);
+    }
   })
+
+  socketController.addConnectionHandler((value) => setConnectedStatus(value)  );
+
   const updateSecret = (value: string) => {
     storage.setItem('secret', value);
     setSecret(value);
@@ -103,85 +129,89 @@ function App() {
   const updateTicker = (value: string) => {
     setTicker((value ?? '').toString().toUpperCase())
   }
-  const gridXs = 2
+  const gridXs = 3
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>stockr</h1>
         <Box>
-          <Grid container spacing={2} columns={6}>
-            <Grid container item>
-              <Grid item>
+          <div align={'left'}>
+            <h2>Controls</h2>
+          </div>
+          <Grid container spacing={2} columns={9}>
+            <Grid container item spacing={2}>
+              <Grid item xs={gridXs}>
                 <TextField
                   id="alpaca-api-key-secret"
                   label="API Key Secret"
                   type="password"
-                  defaultValue={secret}
+                  fullWidth
                   autoComplete='alpaca-api-key-secret'
                   onChange={(event) => updateSecret(event.target.value)}
                   value={secret}
                 />
               </Grid>
-              <Grid item>
+              <Grid item xs={gridXs}>
                 <TextField
                   id="alpaca-api-key-id"
                   label="API Key ID"
                   type='text'
-                  defaultValue={keyId}
+                  fullWidth
                   autoComplete='alpaca-api-key-id'
                   onChange={(event) => updateKeyId(event.target.value)}
                   value={keyId}
                 />
               </Grid>
-              <Grid item>
+              <Grid item xs={gridXs}>
                 <Button
                   className='button-stockr'
                   variant="contained"
+                  fullWidth
                   onClick={() => socketController.connect({keyId, secret})}>
-                  {socketController?.status() ? 'Connected ⚡' : 'Press to Connect 🚀'}
+                  {connected ? 'Connected ⚡' : 'Press to Connect 🚀'}
                 </Button>
               </Grid>
             </Grid>
-            <Grid container item>
-              <Grid item>
+            <Grid container item spacing={2}>
+              <Grid item xs={gridXs}>
                 <TextField
                   id="ticker"
                   label="Ticker"
                   type='text'
-                  defaultValue=''
+                  fullWidth
                   onChange={(event) => updateTicker(event.target.value)}
                   value={ticker}
                 />
               </Grid>
-              <Grid item>
+              <Grid item xs={gridXs}>
                 <Button
                   variant="contained"
                   className='button-stockr'
+                  fullWidth
                   onClick={() => socketController.subscribe(ticker)}>
                   Subscribe
                 </Button>
               </Grid>
-              <Grid item>
+              <Grid item xs={gridXs}>
                 <Button
                   variant="contained"
                   className='button-stockr'
+                  fullWidth
                   onClick={() => socketController.unsubscribe(ticker)}>
                   Unsubscribe
                 </Button>
               </Grid>
             </Grid>
-
           </Grid>
         </Box>
-
-
-        {/*<DataGrid columns={['123',]} rows={[]}>*/}
-        {/*</DataGrid>*/}
         <div>
           <ul>
             <li>
               Asking Price {ap}
+            </li>
+            <li>
+              {q}
             </li>
           </ul>
         </div>
