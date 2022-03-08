@@ -18,7 +18,7 @@ export function TradeTable() {
   const [connected, setConnected] = useState(socketController.connected());
 
   function updateTickers(m: SubscriptionMessage) {
-    setTickers(m.trades)
+    setTickers(m.trades.sort())
   }
 
   function tradeTableConnectionHandler(status: boolean) {
