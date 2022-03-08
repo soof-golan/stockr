@@ -11,6 +11,12 @@ export function TradeFooterRow({connected}: { connected: boolean }) {
   const updateTicker = (value: string) => {
     setTicker((value ?? '').toString().toUpperCase())
   };
+
+  const subscribe = () => {
+    socketController.subscribe(ticker);
+    setTicker('');
+  }
+
   return <TableRow
     key='inputTicker'
     sx={{'&:last-child td, &:last-child th': {border: 0}}}
@@ -27,7 +33,7 @@ export function TradeFooterRow({connected}: { connected: boolean }) {
         }}
         onKeyPress={(e) => {
           if (e.key === 'Enter') {
-            socketController.subscribe(ticker);
+            subscribe();
           }
         }}
         value={ticker}
@@ -39,7 +45,7 @@ export function TradeFooterRow({connected}: { connected: boolean }) {
     <TableCell align="left">
       <Button
         fullWidth
-        onClick={() => socketController.subscribe(ticker)}
+        onClick={subscribe}
         variant='outlined'
         disabled={!connected}
       >
