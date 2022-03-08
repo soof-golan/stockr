@@ -32,7 +32,7 @@ function TradeRow({ticker}: {ticker: string}){
     <TableCell align="right">{data.askingPrice}</TableCell>
     <TableCell align="right">{data.bidPrice}</TableCell>
     <TableCell align="right">{data.timestamp}</TableCell>
-    <TableCell align="right">
+    <TableCell align="center">
       <Button onClick={() => socketController.unsubscribe(ticker)}>⛔</Button>
     </TableCell>
   </TableRow>
@@ -56,7 +56,7 @@ export function TradeTable() {
           <TableCell align="right">Asking Price</TableCell>
           <TableCell align="right">Bid Price</TableCell>
           <TableCell align="right">Timestamp</TableCell>
-          <TableCell align="right">Controls</TableCell>
+          <TableCell align="center">Controls</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
