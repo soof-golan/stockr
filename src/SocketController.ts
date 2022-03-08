@@ -92,6 +92,7 @@ export class SocketController {
   public addConnectionHandler = (handler: ConnectionHandler) => this.connectionHandlers.push(handler);
   public addSubscriptionHandler = (handler: SubscriptionHandler) => this.addHandler(handler, 'subscription');
   public connected = () => ((!this.ws.CLOSED) && (this.ws.OPEN))
+  public connecting =() => (!this.connected()) && this.ws.CONNECTING
 }
 
 export const useSocketController = () => SocketController.get()

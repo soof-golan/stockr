@@ -3,6 +3,7 @@ import React, {useState} from "react";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import CircularProgress from '@mui/material/CircularProgress'
 
 export function ConnectionControl({gridXs}: { gridXs: number }) {
   const storage = window.localStorage;
@@ -11,8 +12,14 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
   const [keyId, setKeyId] = useState(storage?.keyId ?? '');
   // @ts-ignore
   const [connected, setConnectedStatus] = useState<boolean>(socketController.connected());
+  // @ts-ignore
+  const [connecting, setConnectingStatus] = useState<boolean>(socketController.connecting());
 
-  socketController.addConnectionHandler((value) => setConnectedStatus(value));
+  socketController.addConnectionHandler((value) => {
+    setConnectedStatus(value)
+    // @ts-ignore
+    setConnectingStatus(socketController.connecting());
+  });
 
   const updateSecret = (value: string) => {
     storage.setItem('secret', value);
@@ -22,6 +29,13 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
     storage.setItem('keyId', value);
     setKeyId(value);
   }
+
+  const connect = () => {
+    setConnectingStatus(true);
+    setConnectedStatus(false);
+    socketController.connect({keyId, secret});
+  };
+
   return <Grid container spacing={2} columns={9}>
     <Grid container item spacing={2}>
       <Grid item xs={gridXs}>
@@ -51,8 +65,9 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
           className='button-stockr'
           variant="contained"
           fullWidth
-          onClick={() => socketController.connect({keyId, secret})}>
-          {connected ? 'Connected ⚡' : 'Press to Connect 🚀'}
+          onClick={() => connect()}>
+          {connecting ? <CircularProgress size={20}/> :''}
+          {connected ? 'Live ⚡' : connecting ? "" : 'Connect'}
         </Button>
       </Grid>
     </Grid>
