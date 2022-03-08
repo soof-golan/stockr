@@ -1,4 +1,11 @@
-import {AlpacaCredentials, AlpacaMessage, ConnectionHandler, SubscriptionHandler, TradeHandler} from "./types";
+import {
+  AlpacaCredentials,
+  AlpacaMessage,
+  ConnectionHandler,
+  SubscriptionHandler,
+  TradeHandler,
+  TradeMessage
+} from "./types";
 
 export class SocketController {
   private ws: Partial<WebSocket> = {};
@@ -6,7 +13,6 @@ export class SocketController {
   private promisifyClose = async (ws: Partial<WebSocket>) => new Promise<void>(resolve => {
     const prevHandler = ws.onclose;
     return ws.onclose = (e) => {
-      console.log(prevHandler)
       if (typeof prevHandler === 'function') {
         // @ts-ignore
         prevHandler(e);
@@ -14,7 +20,7 @@ export class SocketController {
       resolve();
     };
   });
-  private static instance: SocketController| undefined = undefined;
+  private static instance: SocketController | undefined = undefined;
   static get = () => {
     SocketController.instance = SocketController.instance ?? new SocketController();
     return SocketController.instance
@@ -37,12 +43,11 @@ export class SocketController {
     this.send({action: "auth", key: keyId, secret});
   }
   private connectionHandlers: Array<(v: boolean) => any> = []
-  private messageHandlers: { [T: string]: Array<TradeHandler | SubscriptionHandler> } = {
-    q: [],
-    t: [],
-    subscription: []
+  private tradeHandlers: { [T: string]: { [ticker: string]: TradeHandler } } = {
+    q: {},
+    t: {},
   }
-
+  private subscriptionHandlers: Array<SubscriptionHandler> = []
   private handlers: { [eventName: string]: (message: AlpacaMessage) => any } = {
     'authenticated': (message: AlpacaMessage) => {
       console.log('Connected successfully!', message)
@@ -55,11 +60,14 @@ export class SocketController {
   }
 
   private onMessage = (event: MessageEvent) => {
-    const messages: AlpacaMessage[] = JSON.parse(event.data);
-    console.log('Message:', messages)
-    messages.filter(message => message?.msg in this.handlers).map((message) => this.handlers[message.msg](message));
+    const messages: Array<AlpacaMessage & any> = JSON.parse(event.data);
+    messages.filter(message => message?.msg in this.handlers).forEach((message) => this.handlers[message.msg](message));
     // @ts-ignore
-    messages.filter(messages => messages.T in this.messageHandlers).map(message => this.messageHandlers[message.T].map(f => f(message)));
+    messages.filter(messages => messages.T in this.tradeHandlers)
+      .forEach(
+        (message: TradeMessage) => this.tradeHandlers[message.T]?.[message.S]?.(message)
+      );
+    messages.filter(m => m.T === 'subscription').forEach(m => this.subscriptionHandlers.forEach(f => f(m)))
   }
 
   private close = () => {
@@ -86,13 +94,15 @@ export class SocketController {
 
   public subscribe = (ticker: string) => this.send({action: "subscribe", trades: [ticker], quotes: [ticker]});
   public unsubscribe = (ticker: string) => this.send({action: "unsubscribe", trades: [ticker], quotes: [ticker]});
-  private addHandler = (handler: TradeHandler | SubscriptionHandler, T: string): any => this.messageHandlers[T].push(handler);
-  public addTradeHandler = (handler: TradeHandler) => this.addHandler(handler, 't')
-  public addQuoteHandler = (handler: TradeHandler) => this.addHandler(handler, 'q');
+  private addHandler = (ticker: string, handler: TradeHandler, T: string): any => {
+    this.tradeHandlers[T][ticker] = handler;
+  };
+  public addTradeHandler = (ticker: string, handler: TradeHandler) => this.addHandler(ticker, handler, 't')
+  public addQuoteHandler = (ticker: string, handler: TradeHandler) => this.addHandler(ticker, handler, 'q');
   public addConnectionHandler = (handler: ConnectionHandler) => this.connectionHandlers.push(handler);
-  public addSubscriptionHandler = (handler: SubscriptionHandler) => this.addHandler(handler, 'subscription');
+  public addSubscriptionHandler = (handler: SubscriptionHandler) => this.subscriptionHandlers.push(handler);
   public connected = () => ((!this.ws.CLOSED) && (this.ws.OPEN))
-  public connecting =() => (!this.connected()) && this.ws.CONNECTING
+  public connecting = () => (!this.connected()) && this.ws.CONNECTING
 }
 
 export const useSocketController = () => SocketController.get()
