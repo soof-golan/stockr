@@ -10,15 +10,24 @@ import TableBody from "@mui/material/TableBody";
 import {TradeRow} from "./TradeRow";
 import {TradeFooterRow} from "./TradeFooterRow";
 import {SubscriptionMessage} from "../types";
+import TableFooter from "@mui/material/TableFooter";
 
 export function TradeTable() {
   const socketController = useSocketController();
   const [tickers, setTickers] = useState<Array<string>>([]);
+  const [connected, setConnected] = useState(socketController.connected());
+
+  function updateTickers(m: SubscriptionMessage) {
+    setTickers(m.trades)
+  }
+
+  function tradeTableConnectionHandler(status: boolean) {
+    setConnected(status);
+  }
 
   useEffect(() => {
-    socketController.addSubscriptionHandler((m: SubscriptionMessage) => {
-      setTickers(m.trades)
-    });
+    socketController.addConnectionHandler(tradeTableConnectionHandler)
+    socketController.addSubscriptionHandler(updateTickers);
   })
 
   return <TableContainer component={Paper}>
@@ -34,10 +43,12 @@ export function TradeTable() {
       </TableHead>
       <TableBody>
         {tickers.map((ticker) => (
-          <TradeRow ticker={ticker}/>
+          <TradeRow ticker={ticker} connected={connected}/>
         ))}
       </TableBody>
-      <TradeFooterRow/>
+      <TableFooter>
+        <TradeFooterRow connected={connected}/>
+      </TableFooter>
     </Table>
   </TableContainer>
 }

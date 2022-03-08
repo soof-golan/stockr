@@ -4,7 +4,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Button from "@mui/material/Button";
 
-export function TradeRow({ticker}: { ticker: string }) {
+export function TradeRow({ticker}: { ticker: string, connected: boolean }) {
   const createData = (
     askingPrice: number,
     bidPrice: number,
@@ -29,7 +29,14 @@ export function TradeRow({ticker}: { ticker: string }) {
     <TableCell align="right">{data.bidPrice}</TableCell>
     <TableCell align="right">{data.timestamp}</TableCell>
     <TableCell align="left">
-      <Button onClick={() => socketController.unsubscribe(ticker)}>➖ Unsubscribe</Button>
+      <Button
+        variant='outlined'
+        color={'info'}
+        fullWidth
+        onClick={() => socketController.unsubscribe(ticker)}
+      >
+        ➖ Unsubscribe
+      </Button>
     </TableCell>
   </TableRow>
 }

@@ -1,5 +1,5 @@
 import {useSocketController} from "../SocketController";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -10,16 +10,24 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
   const socketController = useSocketController();
   const [secret, setSecret] = useState(storage?.secret ?? '');
   const [keyId, setKeyId] = useState(storage?.keyId ?? '');
-  // @ts-ignore
   const [connected, setConnectedStatus] = useState<boolean>(socketController.connected());
-  // @ts-ignore
   const [connecting, setConnectingStatus] = useState<boolean>(socketController.connecting());
 
-  socketController.addConnectionHandler((value) => {
-    setConnectedStatus(value)
-    // @ts-ignore
-    setConnectingStatus(socketController.connecting());
-  });
+
+  useEffect(() => {
+    const connectionStatusErrorHandler = () => {
+      setConnectedStatus(socketController.connected());
+      setConnectingStatus(socketController.connecting());
+    }
+
+    function connectionUpdateHandler(connectionStatus: boolean) {
+      setConnectedStatus(connectionStatus)
+      setConnectingStatus(socketController.connecting());
+    }
+
+    socketController.addConnectionHandler(connectionUpdateHandler);
+    socketController.addErrorHandler(connectionStatusErrorHandler)
+  })
 
   const updateSecret = (value: string) => {
     storage.setItem('secret', value);
@@ -63,10 +71,11 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
       <Grid item xs={gridXs}>
         <Button
           className='button-stockr'
-          variant="contained"
+          variant={connected ? 'outlined' : 'contained'}
+          color={connected ? 'success' : connecting ? "info" : 'primary'}
           fullWidth
           onClick={() => connect()}>
-          {connecting ? <CircularProgress size={20}/> :''}
+          {connecting ? <CircularProgress size={20}/> : ''}
           {connected ? 'Live ⚡' : connecting ? "" : 'Connect'}
         </Button>
       </Grid>

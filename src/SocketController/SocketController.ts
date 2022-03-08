@@ -1,3 +1,4 @@
+import set from "lodash/set";
 import {
   AlpacaCredentials,
   AlpacaMessage,
@@ -33,6 +34,7 @@ export class SocketController {
 
   handleError = (message: AlpacaMessage) => {
     console.error(message)
+    Object.values(this.errorHandlers).forEach(f => f(message))
     this.close();
   }
 
@@ -42,21 +44,23 @@ export class SocketController {
     console.log('Authenticating', keyId)
     this.send({action: "auth", key: keyId, secret});
   }
-  private connectionHandlers: Array<(v: boolean) => any> = []
+  private connectionHandlers: Record<string, (v: boolean) => any> = {}
   private tradeHandlers: { [T: string]: { [ticker: string]: TradeHandler } } = {
     q: {},
     t: {},
   }
-  private subscriptionHandlers: Array<SubscriptionHandler> = []
+  private subscriptionHandlers: Record<string, SubscriptionHandler> = {}
+  private errorHandlers: Record<string, (e: AlpacaMessage) => void> = {}
   private handlers: { [eventName: string]: (message: AlpacaMessage) => any } = {
     'authenticated': (message: AlpacaMessage) => {
-      console.log('Connected successfully!', message)
-      this.connectionHandlers.forEach(f => f(true));
+      console.log('Connected successfully!', message);
+      Object.values(this.connectionHandlers).forEach(f => f(true));
     },
     'connected': ({T}: AlpacaMessage) => (T === 'success') ? this.authenticate() : null,
     "connection limit exceeded": this.handleError,
     "auth timeout": this.handleError,
     "auth failed": this.handleError,
+
   }
 
   private onMessage = (event: MessageEvent) => {
@@ -67,7 +71,7 @@ export class SocketController {
       .forEach(
         (message: TradeMessage) => this.tradeHandlers[message.T]?.[message.S]?.(message)
       );
-    messages.filter(m => m.T === 'subscription').forEach(m => this.subscriptionHandlers.forEach(f => f(m)))
+    messages.filter(m => m.T === 'subscription').forEach(m => Object.values(this.subscriptionHandlers).forEach(f => f(m)))
   }
 
   private close = () => {
@@ -87,8 +91,8 @@ export class SocketController {
     this.ws = new WebSocket('wss://stream.data.alpaca.markets/v2/iex');
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onclose = (e) => {
-      console.warn(e)
-      this.connectionHandlers.forEach(f => f(false));
+      console.warn(e);
+      Object.values(this.connectionHandlers).forEach(f => f(false));
     };
   }
 
@@ -99,10 +103,11 @@ export class SocketController {
   };
   public addTradeHandler = (ticker: string, handler: TradeHandler) => this.addHandler(ticker, handler, 't')
   public addQuoteHandler = (ticker: string, handler: TradeHandler) => this.addHandler(ticker, handler, 'q');
-  public addConnectionHandler = (handler: ConnectionHandler) => this.connectionHandlers.push(handler);
-  public addSubscriptionHandler = (handler: SubscriptionHandler) => this.subscriptionHandlers.push(handler);
-  public connected = () => ((!this.ws.CLOSED) && (this.ws.OPEN))
-  public connecting = () => (!this.connected()) && this.ws.CONNECTING
+  public addConnectionHandler = (handler: ConnectionHandler) => set(this.connectionHandlers, handler.name, handler);
+  public addSubscriptionHandler = (handler: SubscriptionHandler) => set(this.subscriptionHandlers, handler.name, handler);
+  public addErrorHandler = (handler: (e: AlpacaMessage) => void) => set(this.errorHandlers, handler.name, handler);
+  public connected = (): boolean => !!((!this.ws.CLOSED) && (this.ws.OPEN))
+  public connecting = (): boolean => !!((!this.connected()) && this.ws.CONNECTING)
 }
 
 export const useSocketController = () => SocketController.get()
