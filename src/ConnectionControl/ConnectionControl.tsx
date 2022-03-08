@@ -1,4 +1,4 @@
-import {useSocketController} from "./SocketController";
+import {useSocketController} from "../SocketController";
 import React, {useState} from "react";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";

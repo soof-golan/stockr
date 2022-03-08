@@ -5,7 +5,7 @@ import {
   SubscriptionHandler,
   TradeHandler,
   TradeMessage
-} from "./types";
+} from "../types";
 
 export class SocketController {
   private ws: Partial<WebSocket> = {};

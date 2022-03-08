@@ -2,7 +2,6 @@ import React from 'react'
 import './App.css'
 import Box from '@mui/material/Box';
 import {TradeTable} from "./TradeTable";
-import {TradeControl} from "./TradeControl";
 import {ConnectionControl} from "./ConnectionControl";
 
 function App() {
@@ -14,8 +13,6 @@ function App() {
         <Box>
           <h2>Connection Control</h2>
           <ConnectionControl gridXs={gridXs}/>
-          <h2>Trade Controls</h2>
-          <TradeControl gridXs={gridXs}/>
           <h2>Trading Data</h2>
           <TradeTable/>
         </Box>
