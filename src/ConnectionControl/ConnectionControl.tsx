@@ -13,7 +13,6 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
   const [connected, setConnectedStatus] = useState<boolean>(socketController.connected());
   const [connecting, setConnectingStatus] = useState<boolean>(socketController.connecting());
 
-
   useEffect(() => {
     const connectionStatusErrorHandler = () => {
       setConnectedStatus(socketController.connected());
@@ -44,7 +43,7 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
     socketController.connect({keyId, secret});
   };
 
-  return <Grid container spacing={2} columns={9}>
+  return <Grid container spacing={2} columns={12}>
     <Grid container item spacing={2}>
       <Grid item xs={gridXs}>
         <TextField
@@ -77,6 +76,19 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
           onClick={() => connect()}>
           {connecting ? <CircularProgress size={20}/> : ''}
           {connected ? 'Live ⚡' : connecting ? "" : 'Connect'}
+        </Button>
+      </Grid>
+      <Grid item xs={gridXs}>
+        <Button
+          className='button-stockr'
+          variant={'outlined'}
+          color={'info'}
+          fullWidth
+          href={'https://alpaca.markets'}
+          rel="noopener noreferrer"
+          target={"_blank"}
+          onClick={() => connect()}>
+          Issue API Key ↗
         </Button>
       </Grid>
     </Grid>
