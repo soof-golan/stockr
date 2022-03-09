@@ -7,6 +7,8 @@ WebSockets
 
 Play with it live at [stockr.soofgolan.com](https://stockr.soofgolan.com)
 
+![stockr demo](assets/demo.gif)
+
 ## Get Started
 
 You'll need an API key from [Alpaca HQ](https://alpaca.markets/)
