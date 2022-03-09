@@ -4,6 +4,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import {TradeMessage} from "../types";
 
 export function TradeRow({ticker}: { ticker: string, connected: boolean }) {
   const createData = (
@@ -14,10 +15,12 @@ export function TradeRow({ticker}: { ticker: string, connected: boolean }) {
 
   const socketController = useSocketController();
   const [data, setData] = useState(createData(0, 0, 'waiting for data'))
+  function tradeRowQuoteHandler(m: TradeMessage) {
+    setData(createData(m.ap || data.askingPrice, m.bp || data.bidPrice, m.t));
+
+  }
   useEffect(() => {
-    socketController.addQuoteHandler(ticker, (m) => {
-      setData(createData(m.ap || data.askingPrice, m.bp || data.bidPrice, m.t));
-    });
+    socketController.addQuoteHandler(ticker, tradeRowQuoteHandler);
   })
   return <TableRow
     key={ticker}
