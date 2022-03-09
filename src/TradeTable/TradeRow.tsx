@@ -3,6 +3,7 @@ import React, {useEffect, useState} from "react";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export function TradeRow({ticker}: { ticker: string, connected: boolean }) {
   const createData = (
@@ -12,7 +13,7 @@ export function TradeRow({ticker}: { ticker: string, connected: boolean }) {
   ) => ({askingPrice, bidPrice, timestamp});
 
   const socketController = useSocketController();
-  const [data, setData] = useState(createData(-1, -1, 'waiting for data'))
+  const [data, setData] = useState(createData(0, 0, 'waiting for data'))
   useEffect(() => {
     socketController.addQuoteHandler(ticker, (m) => {
       setData(createData(m.ap || data.askingPrice, m.bp || data.bidPrice, m.t));
@@ -25,8 +26,8 @@ export function TradeRow({ticker}: { ticker: string, connected: boolean }) {
     <TableCell component="th" scope="row">
       {ticker}
     </TableCell>
-    <TableCell align="right">{data.askingPrice}</TableCell>
-    <TableCell align="right">{data.bidPrice}</TableCell>
+    <TableCell align="right">{data.askingPrice || <CircularProgress size={20}/>}</TableCell>
+    <TableCell align="right">{data.bidPrice || <CircularProgress size={20}/>}</TableCell>
     <TableCell align="right">{data.timestamp}</TableCell>
     <TableCell align="left">
       <Button
