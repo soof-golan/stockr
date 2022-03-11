@@ -30,6 +30,11 @@ export function PromoSection({gridXs}: { gridXs: number }) {
           Read the Post ↗
         </Button>
       </Grid>
+      <Grid item xs={gridXs}>
+      </Grid>
+      <Grid item xs={gridXs}>
+        <h6>© 2022 Soof Golan</h6>
+      </Grid>
     </Grid>
   </Grid>
 }
