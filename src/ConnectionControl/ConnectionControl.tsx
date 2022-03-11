@@ -86,8 +86,7 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
           fullWidth
           href={'https://alpaca.markets'}
           rel="noopener noreferrer"
-          target={"_blank"}
-          onClick={() => connect()}>
+          target={"_blank"}>
           Issue API Key ↗
         </Button>
       </Grid>

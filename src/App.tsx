@@ -3,6 +3,7 @@ import './App.css'
 import Box from '@mui/material/Box';
 import {TradeTable} from "./TradeTable";
 import {ConnectionControl} from "./ConnectionControl";
+import {PromoSection} from "./PromoSection";
 
 function App() {
   const gridXs = 3;
@@ -15,6 +16,8 @@ function App() {
           <ConnectionControl gridXs={gridXs}/>
           <h2>Trading Data</h2>
           <TradeTable/>
+          <h4>External Links</h4>
+          <PromoSection gridXs={gridXs}/>
         </Box>
       </header>
     </div>
