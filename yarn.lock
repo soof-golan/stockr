@@ -1266,6 +1266,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-document-meta@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/react-document-meta@npm:3.0.2"
+  dependencies:
+    "@types/react": "*"
+  checksum: 341e0240ae190e2ead3b792b2ce168a7d201a08d14403dab3ec3a12be6f09dff6d95242b611e09f2ed61512a911ecefcecfb311407884608f7836f3bfbb14ba5
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:^17.0.10":
   version: 17.0.11
   resolution: "@types/react-dom@npm:17.0.11"
@@ -4165,7 +4174,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
+"prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -4187,6 +4196,19 @@ __metadata:
   version: 2.1.1
   resolution: "punycode@npm:2.1.1"
   checksum: 823bf443c6dd14f669984dea25757b37993f67e8d94698996064035edd43bed8a5a17a9f12e439c2b35df1078c6bec05a6c86e336209eb1061e8025c481168e8
+  languageName: node
+  linkType: hard
+
+"react-document-meta@npm:^3.0.0-beta.2":
+  version: 3.0.0-beta.5
+  resolution: "react-document-meta@npm:3.0.0-beta.5"
+  dependencies:
+    prop-types: ^15.6.1
+    react-side-effect: ^1.1.5
+  peerDependencies:
+    react: ">=0.14.0"
+    react-dom: ">=0.14.0"
+  checksum: 6b1857f5b5de4889372b661a1c18375494b90a746fbd8ee11974da21fa58b3b9ac8340cc6880eb74ea78fd679a513177040daaa7b955c038b38333a7677c207f
   languageName: node
   linkType: hard
 
@@ -4221,6 +4243,17 @@ __metadata:
   version: 0.11.0
   resolution: "react-refresh@npm:0.11.0"
   checksum: 112178a05b1e0ffeaf5d9fb4e56b4410a34a73adeb04dbf13abdc50d9ac9df2ada83e81485156cca0b3fa296aa3612751b3d6cd13be4464642a43679b819cbc7
+  languageName: node
+  linkType: hard
+
+"react-side-effect@npm:^1.1.5":
+  version: 1.2.0
+  resolution: "react-side-effect@npm:1.2.0"
+  dependencies:
+    shallowequal: ^1.0.1
+  peerDependencies:
+    react: ^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0
+  checksum: f84c99bc13999f632c7d341b2fe5e1a6cfbf1708ce10e80624535a5296a37359e8cb94c3cde5a3506dbe151fc712896132fae4f856e079fded638b0cb5a4a00e
   languageName: node
   linkType: hard
 
@@ -4429,6 +4462,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"shallowequal@npm:^1.0.1":
+  version: 1.1.0
+  resolution: "shallowequal@npm:1.1.0"
+  checksum: f4c1de0837f106d2dbbfd5d0720a5d059d1c66b42b580965c8f06bb1db684be8783538b684092648c981294bf817869f743a066538771dbecb293df78f765e00
+  languageName: node
+  linkType: hard
+
 "shebang-command@npm:^2.0.0":
   version: 2.0.0
   resolution: "shebang-command@npm:2.0.0"
@@ -4568,11 +4608,13 @@ __metadata:
     "@types/jest": ^27.4.1
     "@types/lodash": ^4.14.179
     "@types/react": ^17.0.33
+    "@types/react-document-meta": ^3.0.2
     "@types/react-dom": ^17.0.10
     "@vitejs/plugin-react": ^1.0.7
     jest: ^27.5.1
     lodash: ^4.17.21
     react: ^17.0.2
+    react-document-meta: ^3.0.0-beta.2
     react-dom: ^17.0.2
     typescript: ^4.5.4
     vite: ^2.8.0
