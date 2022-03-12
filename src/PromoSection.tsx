@@ -24,7 +24,7 @@ export function PromoSection({gridXs}: { gridXs: number }) {
           variant={'outlined'}
           color={'info'}
           fullWidth
-          href={'https://blog.soofgolan.com/post/stockr'}
+          href={'https://blog.soofgolan.com/posts/stockr'}
           rel="noopener noreferrer"
           target={"_blank"}>
           Read the Post ↗
