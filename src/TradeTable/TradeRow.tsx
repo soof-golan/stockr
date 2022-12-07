@@ -21,7 +21,10 @@ export function TradeRow({ticker}: { ticker: string, connected: boolean }) {
   }
   useEffect(() => {
     socketController.addQuoteHandler(ticker, tradeRowQuoteHandler);
-  })
+    return () => {
+      socketController.removeQuoteHandler(ticker);
+    }
+  }, [])
   return <TableRow
     key={ticker}
     sx={{'&:last-child td, &:last-child th': {border: 0}}}

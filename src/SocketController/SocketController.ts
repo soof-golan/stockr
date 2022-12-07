@@ -101,11 +101,19 @@ export class SocketController {
   private addHandler = (ticker: string, handler: TradeHandler, T: string): any => {
     this.tradeHandlers[T][ticker] = handler;
   };
+  private removeHandler = (ticker: string, T: string): any => {
+    delete this.tradeHandlers[T][ticker];
+  }
   public addTradeHandler = (ticker: string, handler: TradeHandler) => this.addHandler(ticker, handler, 't')
+  public removeTradeHandler = (ticker: string) => this.removeHandler(ticker, 't')
   public addQuoteHandler = (ticker: string, handler: TradeHandler) => this.addHandler(ticker, handler, 'q');
+  public removeQuoteHandler = (ticker: string) => this.removeHandler(ticker, 'q');
   public addConnectionHandler = (handler: ConnectionHandler) => set(this.connectionHandlers, handler.name, handler);
+  public removeConnectionHandler = (handler: ConnectionHandler) => delete this.connectionHandlers[handler.name];
   public addSubscriptionHandler = (handler: SubscriptionHandler) => set(this.subscriptionHandlers, handler.name, handler);
+  public removeSubscriptionHandler = (handler: SubscriptionHandler) => delete this.subscriptionHandlers[handler.name];
   public addErrorHandler = (handler: (e: AlpacaMessage) => void) => set(this.errorHandlers, handler.name, handler);
+  public removeErrorHandler = (handler: (e: AlpacaMessage) => void) => delete this.errorHandlers[handler.name];
   public connected = (): boolean => !!((!this.ws.CLOSED) && (this.ws.OPEN))
   public connecting = (): boolean => !!((!this.connected()) && this.ws.CONNECTING)
 }

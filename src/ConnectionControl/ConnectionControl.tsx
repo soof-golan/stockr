@@ -26,7 +26,11 @@ export function ConnectionControl({gridXs}: { gridXs: number }) {
 
     socketController.addConnectionHandler(connectionUpdateHandler);
     socketController.addErrorHandler(connectionStatusErrorHandler)
-  })
+    return () => {
+      socketController.removeConnectionHandler(connectionUpdateHandler);
+      socketController.removeErrorHandler(connectionStatusErrorHandler)
+    }
+  }, [])
 
   const updateSecret = (value: string) => {
     storage.setItem('secret', value);

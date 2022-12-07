@@ -28,7 +28,11 @@ export function TradeTable() {
   useEffect(() => {
     socketController.addConnectionHandler(tradeTableConnectionHandler)
     socketController.addSubscriptionHandler(updateTickers);
-  })
+    return () => {
+      socketController.removeConnectionHandler(tradeTableConnectionHandler)
+      socketController.removeSubscriptionHandler(updateTickers);
+    }
+  }, [])
 
   return <TableContainer component={Paper}>
     <Table aria-label="simple table">
