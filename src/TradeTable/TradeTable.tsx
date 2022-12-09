@@ -47,7 +47,7 @@ export function TradeTable() {
       </TableHead>
       <TableBody>
         {tickers.map((ticker) => (
-          <TradeRow ticker={ticker} connected={connected}/>
+          <TradeRow key={ticker} ticker={ticker} connected={connected}/>
         ))}
       </TableBody>
       <TableFooter>
